@@ -1,0 +1,38 @@
+MEGAPACK PORTAL DEL ALUMNO
+==========================
+
+1) Copiar este backend encima del backend actual. No contiene carpeta Migrations.
+2) Ejecutar:
+   dotnet ef migrations add VinculoUsuarioAlumnoPortal
+   dotnet ef database update
+
+La migración nueva debe agregar principalmente la columna nullable AlumnoId a Usuarios,
+con FK a Alumnos e índice único (un alumno no puede estar vinculado a dos usuarios).
+
+3) En Roles crear el rol ALUMNO. Si se crea sin permisos desde API, el backend asigna
+   automáticamente:
+   - mis_datos
+   - mi_asistencia
+   - auto_matriculacion
+   Desde la UI, al escribir ALUMNO se marcan esos tres permisos automáticamente.
+
+4) En Usuarios crear/editar una cuenta con rol ALUMNO y seleccionar el alumno asociado.
+
+5) Cerrar sesión e ingresar con esa cuenta.
+   El alumno verá únicamente:
+   - Mis datos
+   - Mi asistencia
+   - Inscripción a materias
+
+SEGURIDAD
+---------
+Los endpoints de autogestión NO reciben AlumnoId desde el navegador. Resuelven el alumno
+asociado a partir del UsuarioId del JWT. Por eso un alumno no puede cambiar el request para
+consultar o matricular a otro alumno.
+
+AUTOMATRICULACIÓN
+-----------------
+- Sólo cursadas activas.
+- Evita matrícula duplicada.
+- Permite reactivar una matrícula previamente dada de baja.
+- La baja autónoma se bloquea si ya existen registros de asistencia, para preservar historia.
