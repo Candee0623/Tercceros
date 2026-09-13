@@ -1,0 +1,4 @@
+using backend.DTOs.Matriculas; using backend.Security; using backend.Services; using Microsoft.AspNetCore.Authorization; using Microsoft.AspNetCore.Mvc;
+namespace backend.Controllers;
+[ApiController][Route("api/[controller]")][Authorize][ScreenPermission(ScreenKeys.Matriculaciones)] public class MatriculacionesController:ControllerBase
+{private readonly MatriculaService _s;public MatriculacionesController(MatriculaService s)=>_s=s;[HttpGet("cursada/{id:guid}")]public async Task<IActionResult> Get(Guid id)=>Ok(await _s.GetByCursadaAsync(id));[HttpPost("cursada/{id:guid}")]public async Task<IActionResult> Add(Guid id,MatricularAlumnoDto dto){var(x,e)=await _s.MatricularAsync(id,dto.AlumnoId);return e==null?Ok(x):BadRequest(e);}[HttpDelete("{id:guid}")]public async Task<IActionResult> Delete(Guid id)=>await _s.DesmatricularAsync(id)?NoContent():NotFound();}

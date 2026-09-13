@@ -1,0 +1,4 @@
+using backend.DTOs.Cursadas; using backend.Security; using backend.Services; using Microsoft.AspNetCore.Authorization; using Microsoft.AspNetCore.Mvc;
+namespace backend.Controllers;
+[ApiController][Route("api/[controller]")][Authorize][ScreenPermission(ScreenKeys.Cursadas)] public class CursadasController:ControllerBase
+{ private readonly CursadaService _s; public CursadasController(CursadaService s)=>_s=s; [HttpGet] public async Task<IActionResult> Get()=>Ok(await _s.GetAllAsync()); [HttpGet("{id:guid}")] public async Task<IActionResult> Get(Guid id){var x=await _s.GetByIdAsync(id);return x==null?NotFound():Ok(x);} [HttpPost] public async Task<IActionResult> Create(SaveCursadaDto dto){var(x,e)=await _s.CreateAsync(dto);return e==null?Ok(x):BadRequest(e);} [HttpPut("{id:guid}")] public async Task<IActionResult> Update(Guid id,SaveCursadaDto dto){var(x,e)=await _s.UpdateAsync(id,dto);return e==null?Ok(x):BadRequest(e);} }
