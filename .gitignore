@@ -1,0 +1,16 @@
+# Carpetas de compilación y resultados temporales (archivos generados al compilar)
+/[Bb]in/
+/[Oo]bj/
+
+# Configuraciones locales y secretos (credenciales y bases de datos locales)
+appsettings.Development.json
+*.user
+*.suo
+
+# Configuraciones del editor de código (archivos de preferencias de Visual Studio o VS Code)
+.vs/
+.vscode/
+
+# Archivos de caché del sistema operativo
+.DS_Store
+Thumbs.db
