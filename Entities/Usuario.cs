@@ -15,4 +15,8 @@ public class Usuario
     // Relación opcional con la ficha académica. Para el rol ALUMNO es obligatoria.
     public Guid? AlumnoId { get; set; }
     public Alumno? Alumno { get; set; }
+
+    // Relación opcional con la ficha docente. Para el rol PROFESOR es obligatoria.
+    public Guid? ProfesorId { get; set; }
+    public Profesor? Profesor { get; set; }
 }

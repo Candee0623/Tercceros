@@ -11,6 +11,8 @@ public class UsuarioDto
     public string RolNombre { get; set; } = string.Empty;
     public Guid? AlumnoId { get; set; }
     public string? AlumnoNombre { get; set; }
+    public Guid? ProfesorId { get; set; }
+    public string? ProfesorNombre { get; set; }
 }
 
 public class CreateUsuarioDto
@@ -21,6 +23,7 @@ public class CreateUsuarioDto
     public string Password { get; set; } = string.Empty;
     public Guid RolId { get; set; }
     public Guid? AlumnoId { get; set; }
+    public Guid? ProfesorId { get; set; }
     public bool Activo { get; set; } = true;
 }
 
@@ -32,6 +35,7 @@ public class UpdateUsuarioDto
     public string? Password { get; set; }
     public Guid RolId { get; set; }
     public Guid? AlumnoId { get; set; }
+    public Guid? ProfesorId { get; set; }
     public bool Activo { get; set; } = true;
 }
 
@@ -46,4 +50,17 @@ public class UsuarioAlumnoOptionDto
     public Guid Id { get; set; }
     public string NombreCompleto { get; set; } = string.Empty;
     public string Dni { get; set; } = string.Empty;
+}
+
+public class UsuarioProfesorOptionDto
+{
+    public Guid Id { get; set; }
+    public string NombreCompleto { get; set; } = string.Empty;
+    public string Dni { get; set; } = string.Empty;
+}
+
+public class CambiarClaveDto
+{
+    public string ClaveActual { get; set; } = string.Empty;
+    public string NuevaClave { get; set; } = string.Empty;
 }

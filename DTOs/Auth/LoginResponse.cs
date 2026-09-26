@@ -7,5 +7,6 @@ public class LoginResponse
     public string NombreCompleto { get; set; } = string.Empty;
     public string Rol { get; set; } = string.Empty;
     public Guid? AlumnoId { get; set; }
+    public Guid? ProfesorId { get; set; }
     public List<string> Permisos { get; set; } = new();
 }

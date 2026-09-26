@@ -28,6 +28,7 @@ builder.Services.AddScoped<EstadoAsistenciaService>();
 builder.Services.AddScoped<PortalAlumnoService>();
 builder.Services.AddScoped<CalificacionService>();
 builder.Services.AddScoped<CuotaService>();
+builder.Services.AddScoped<PortalProfesorService>();
 
 var jwtKey = builder.Configuration["Jwt:Key"]
     ?? throw new InvalidOperationException("Debe configurarse Jwt:Key.");

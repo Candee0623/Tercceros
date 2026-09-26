@@ -28,6 +28,6 @@ public class AuthService
             issuer: _configuration["Jwt:Issuer"], audience: _configuration["Jwt:Audience"], claims: claims,
             expires: DateTime.UtcNow.AddHours(12), signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)), SecurityAlgorithms.HmacSha256));
 
-        return new LoginResponse { Token = new JwtSecurityTokenHandler().WriteToken(token), UsuarioId = usuario.Id, NombreUsuario = usuario.NombreUsuario, NombreCompleto = $"{usuario.Nombre} {usuario.Apellido}".Trim(), Rol = usuario.Rol.Nombre, AlumnoId = usuario.AlumnoId, Permisos = usuario.Rol.EsSistema ? ScreenKeys.Todas.Keys.OrderBy(x => x).ToList() : usuario.Rol.Permisos.Select(p => p.Pantalla).OrderBy(x => x).ToList() };
+        return new LoginResponse { Token = new JwtSecurityTokenHandler().WriteToken(token), UsuarioId = usuario.Id, NombreUsuario = usuario.NombreUsuario, NombreCompleto = $"{usuario.Nombre} {usuario.Apellido}".Trim(), Rol = usuario.Rol.Nombre, AlumnoId = usuario.AlumnoId, ProfesorId = usuario.ProfesorId, Permisos = usuario.Rol.EsSistema ? ScreenKeys.Todas.Keys.OrderBy(x => x).ToList() : usuario.Rol.Permisos.Select(p => p.Pantalla).OrderBy(x => x).ToList() };
     }
 }

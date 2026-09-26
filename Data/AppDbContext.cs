@@ -78,6 +78,16 @@ public class AppDbContext : DbContext
             .HasForeignKey(x => x.AlumnoId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        modelBuilder.Entity<Usuario>()
+            .HasIndex(x => x.ProfesorId)
+            .IsUnique();
+
+        modelBuilder.Entity<Usuario>()
+            .HasOne(x => x.Profesor)
+            .WithMany()
+            .HasForeignKey(x => x.ProfesorId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         modelBuilder.Entity<CursadaHorario>()
             .HasOne(x => x.Cursada)
             .WithMany(x => x.Horarios)

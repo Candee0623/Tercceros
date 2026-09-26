@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using backend.DTOs.Usuarios;
 using backend.Security;
 using backend.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -12,7 +13,12 @@ namespace backend.Controllers;
 public class PortalAlumnoController : ControllerBase
 {
     private readonly PortalAlumnoService _service;
-    public PortalAlumnoController(PortalAlumnoService service) => _service = service;
+    private readonly UsuarioService _usuarioService;
+    public PortalAlumnoController(PortalAlumnoService service, UsuarioService usuarioService)
+    {
+        _service = service;
+        _usuarioService = usuarioService;
+    }
 
     private Guid UsuarioId => Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
@@ -54,5 +60,12 @@ public class PortalAlumnoController : ControllerBase
     {
         var error = await _service.DesmatricularmeAsync(UsuarioId, matriculaId);
         return error == null ? NoContent() : BadRequest(error);
+    }
+
+    [HttpPost("cambiar-clave")]
+    public async Task<IActionResult> CambiarClave(CambiarClaveDto dto)
+    {
+        var error = await _usuarioService.CambiarClaveAsync(UsuarioId, dto);
+        return error == null ? Ok(new { mensaje = "Contraseña actualizada correctamente." }) : BadRequest(error);
     }
 }

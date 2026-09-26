@@ -57,6 +57,9 @@ public class UsuariosController : ControllerBase
     [HttpGet("alumnos")] 
     public async Task<ActionResult<List<UsuarioAlumnoOptionDto>>> GetAlumnos([FromQuery] Guid? incluir = null) => Ok(await _service.GetAlumnosAsync(incluir));
 
+    [HttpGet("profesores")] 
+    public async Task<ActionResult<List<UsuarioProfesorOptionDto>>> GetProfesores([FromQuery] Guid? incluir = null) => Ok(await _service.GetProfesoresAsync(incluir));
+
     [HttpPost] 
     public async Task<IActionResult> Create(CreateUsuarioDto dto) 
     { 

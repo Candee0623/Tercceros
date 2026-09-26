@@ -24,7 +24,9 @@ public class UsuarioService
             RolId = u.RolId,
             RolNombre = u.Rol.Nombre,
             AlumnoId = u.AlumnoId,
-            AlumnoNombre = u.Alumno == null ? null : u.Alumno.Apellido + ", " + u.Alumno.Nombre
+            AlumnoNombre = u.Alumno == null ? null : u.Alumno.Apellido + ", " + u.Alumno.Nombre,
+            ProfesorId = u.ProfesorId,
+            ProfesorNombre = u.Profesor == null ? null : u.Profesor.Apellido + ", " + u.Profesor.Nombre
         }).ToListAsync();
 
     public async Task<List<UsuarioRolOptionDto>> GetRolesAsync() => await _context.Roles
@@ -44,26 +46,54 @@ public class UsuarioService
             Dni = a.Dni
         }).ToListAsync();
 
-    private async Task<(Rol? Rol, string? Error, Guid? AlumnoId)> ValidarRolAlumnoAsync(Guid rolId, Guid? alumnoId, Guid? usuarioEditadoId = null)
+    public async Task<List<UsuarioProfesorOptionDto>> GetProfesoresAsync(Guid? includeProfesorId = null) => await _context.Profesores
+        .AsNoTracking()
+        .Where(p => p.Activo && (p.Id == includeProfesorId || !_context.Usuarios.Any(u => u.ProfesorId == p.Id)))
+        .OrderBy(p => p.Apellido).ThenBy(p => p.Nombre)
+        .Select(p => new UsuarioProfesorOptionDto
+        {
+            Id = p.Id,
+            NombreCompleto = p.Apellido + ", " + p.Nombre,
+            Dni = p.Dni
+        }).ToListAsync();
+
+    private async Task<(Rol? Rol, string? Error, Guid? AlumnoId, Guid? ProfesorId)> ValidarRolUsuarioAsync(Guid rolId, Guid? alumnoId, Guid? profesorId, Guid? usuarioEditadoId = null)
     {
         var rol = await _context.Roles.FirstOrDefaultAsync(r => r.Id == rolId && r.Activo);
-        if (rol == null) return (null, "El rol indicado no existe o está inactivo.", null);
+        if (rol == null) return (null, "El rol indicado no existe o está inactivo.", null, null);
 
         var esAlumno = rol.Nombre.Equals("ALUMNO", StringComparison.OrdinalIgnoreCase);
-        if (!esAlumno)
-            return (rol, null, null); // Una cuenta no ALUMNO no conserva vínculo académico.
+        var esProfesor = rol.Nombre.Equals("PROFESOR", StringComparison.OrdinalIgnoreCase);
 
-        if (!alumnoId.HasValue)
-            return (rol, "Para un usuario con rol ALUMNO debés seleccionar el alumno asociado.", null);
+        if (!esAlumno && !esProfesor)
+            return (rol, null, null, null); // Una cuenta no académica no conserva vínculo con la ficha.
 
-        if (!await _context.Alumnos.AnyAsync(a => a.Id == alumnoId.Value && a.Activo))
-            return (rol, "El alumno seleccionado no existe o está inactivo.", null);
+        if (esAlumno)
+        {
+            if (!alumnoId.HasValue)
+                return (rol, "Para un usuario con rol ALUMNO debés seleccionar el alumno asociado.", null, null);
 
-        var yaUsado = await _context.Usuarios.AnyAsync(u => u.AlumnoId == alumnoId.Value && u.Id != usuarioEditadoId);
-        if (yaUsado)
-            return (rol, "Ese alumno ya está asociado a otro usuario.", null);
+            if (!await _context.Alumnos.AnyAsync(a => a.Id == alumnoId.Value && a.Activo))
+                return (rol, "El alumno seleccionado no existe o está inactivo.", null, null);
 
-        return (rol, null, alumnoId);
+            var yaUsado = await _context.Usuarios.AnyAsync(u => u.AlumnoId == alumnoId.Value && u.Id != usuarioEditadoId);
+            if (yaUsado)
+                return (rol, "Ese alumno ya está asociado a otro usuario.", null, null);
+
+            return (rol, null, alumnoId, null);
+        }
+
+        if (!profesorId.HasValue)
+            return (rol, "Para un usuario con rol PROFESOR debés seleccionar el profesor asociado.", null, null);
+
+        if (!await _context.Profesores.AnyAsync(p => p.Id == profesorId.Value && p.Activo))
+            return (rol, "El profesor seleccionado no existe o está inactivo.", null, null);
+
+        var yaUsadoPorProfesor = await _context.Usuarios.AnyAsync(u => u.ProfesorId == profesorId.Value && u.Id != usuarioEditadoId);
+        if (yaUsadoPorProfesor)
+            return (rol, "Ese profesor ya está asociado a otro usuario.", null, null);
+
+        return (rol, null, null, profesorId);
     }
 
     public async Task<(UsuarioDto? Usuario, string? Error)> CreateAsync(CreateUsuarioDto dto)
@@ -74,7 +104,7 @@ public class UsuarioService
         if (await _context.Usuarios.AnyAsync(u => u.NombreUsuario.ToLower() == username.ToLower()))
             return (null, "El nombre de usuario ya existe.");
 
-        var (_, error, alumnoId) = await ValidarRolAlumnoAsync(dto.RolId, dto.AlumnoId);
+        var (_, error, alumnoId, profesorId) = await ValidarRolUsuarioAsync(dto.RolId, dto.AlumnoId, dto.ProfesorId);
         if (error != null) return (null, error);
 
         var u = new Usuario
@@ -86,6 +116,7 @@ public class UsuarioService
             PasswordHash = PasswordHasher.Hash(dto.Password),
             RolId = dto.RolId,
             AlumnoId = alumnoId,
+            ProfesorId = profesorId,
             Activo = dto.Activo
         };
         _context.Usuarios.Add(u);
@@ -105,7 +136,7 @@ public class UsuarioService
         if (id == currentUserId && !dto.Activo)
             return (null, "No podés desactivar el usuario con el que estás conectado.");
 
-        var (_, error, alumnoId) = await ValidarRolAlumnoAsync(dto.RolId, dto.AlumnoId, id);
+        var (_, error, alumnoId, profesorId) = await ValidarRolUsuarioAsync(dto.RolId, dto.AlumnoId, dto.ProfesorId, id);
         if (error != null) return (null, error);
 
         u.NombreUsuario = username;
@@ -113,10 +144,28 @@ public class UsuarioService
         u.Apellido = dto.Apellido.Trim();
         u.RolId = dto.RolId;
         u.AlumnoId = alumnoId;
+        u.ProfesorId = profesorId;
         u.Activo = dto.Activo;
         if (!string.IsNullOrWhiteSpace(dto.Password)) u.PasswordHash = PasswordHasher.Hash(dto.Password);
 
         await _context.SaveChangesAsync();
         return ((await GetAllAsync()).First(x => x.Id == id), null);
+    }
+
+    public async Task<string?> CambiarClaveAsync(Guid usuarioId, CambiarClaveDto dto)
+    {
+        if (string.IsNullOrWhiteSpace(dto.ClaveActual) || string.IsNullOrWhiteSpace(dto.NuevaClave))
+            return "La clave actual y la nueva son obligatorias.";
+        if (dto.NuevaClave.Length < 4)
+            return "La nueva clave debe tener al menos 4 caracteres.";
+
+        var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Id == usuarioId && u.Activo);
+        if (usuario == null) return "El usuario no existe o está inactivo.";
+        if (!PasswordHasher.Verify(dto.ClaveActual, usuario.PasswordHash))
+            return "La clave actual es incorrecta.";
+
+        usuario.PasswordHash = PasswordHasher.Hash(dto.NuevaClave);
+        await _context.SaveChangesAsync();
+        return null;
     }
 }
