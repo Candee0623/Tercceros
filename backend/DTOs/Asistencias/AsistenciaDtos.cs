@@ -1,0 +1,4 @@
+namespace backend.DTOs.Asistencias;
+public class AsistenciaAlumnoDto { public Guid MatriculaId { get; set; } public Guid AlumnoId { get; set; } public string AlumnoNombre { get; set; } = ""; public string AlumnoDni { get; set; } = ""; public string Estado { get; set; } = "PRESENTE"; public decimal HorasAusente { get; set; } public string? Observacion { get; set; } }
+public class PlanillaAsistenciaDto { public Guid? ClaseId { get; set; } public Guid CursadaId { get; set; } public DateTime Fecha { get; set; } public decimal HorasProgramadas { get; set; } public List<AsistenciaAlumnoDto> Alumnos { get; set; } = new(); }
+public class GuardarAsistenciaDto { public Guid CursadaId { get; set; } public DateTime Fecha { get; set; } public decimal HorasProgramadas { get; set; } public List<AsistenciaAlumnoDto> Alumnos { get; set; } = new(); }

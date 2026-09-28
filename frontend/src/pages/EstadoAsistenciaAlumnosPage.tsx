@@ -1,0 +1,13 @@
+import { useEffect, useState } from "react";
+import { getAlumnosConsultaAsistencia, getEstadoAsistenciaAlumno } from "../services/academicoService";
+import type { AlumnoConsultaAsistencia, EstadoAsistenciaAlumno } from "../types/Academico";
+
+export default function EstadoAsistenciaAlumnosPage(){
+  const [alumnos,setAlumnos]=useState<AlumnoConsultaAsistencia[]>([]),[alumnoId,setAlumnoId]=useState(""),[estado,setEstado]=useState<EstadoAsistenciaAlumno|null>(null),[error,setError]=useState("");
+  useEffect(()=>{getAlumnosConsultaAsistencia().then(setAlumnos).catch(e=>setError(e instanceof Error?e.message:"Error"))},[]);
+  async function consultar(id:string){setAlumnoId(id);setEstado(null);setError("");if(!id)return;try{setEstado(await getEstadoAsistenciaAlumno(id))}catch(e){setError(e instanceof Error?e.message:"Error")}}
+  return <div><div className="page-header"><h1>Estado de asistencia</h1><p>Consultá el porcentaje de asistencia del alumno sobre las horas totales planificadas de cada cursada.</p></div>{error&&<div className="alert-error">{error}</div>}
+  <div className="card"><div className="form-group"><label>Alumno</label><select value={alumnoId} onChange={e=>consultar(e.target.value)}><option value="">Seleccionar alumno...</option>{alumnos.map(a=><option key={a.id} value={a.id}>{a.nombreCompleto} · DNI {a.dni}</option>)}</select></div></div>
+  {estado&&<><div className="card"><h3>{estado.alumnoNombre}</h3><p>DNI {estado.dni}</p></div>{estado.cursadas.length===0?<div className="card">El alumno no tiene cursadas activas matriculadas.</div>:<div className="attendance-cards">{estado.cursadas.map(c=><div className="card attendance-status-card" key={c.matriculaId}><div className="attendance-card-head"><div><h3>{c.materia}</h3><p>{c.cicloLectivo} · {c.periodo}{c.profesor?` · ${c.profesor}`:""}</p></div><span className={`status-pill status-${c.condicion.toLowerCase()}`}>{c.condicion}</span></div><div className="attendance-percent">{c.porcentajeAsistencia.toFixed(2)}%</div><div className="attendance-progress"><div style={{width:`${Math.max(0,Math.min(100,c.porcentajeAsistencia))}%`}}/></div><div className="attendance-metrics"><div><strong>{c.horasAsistidas}</strong><span>Hs. asistidas</span></div><div><strong>{c.horasAusentes}</strong><span>Hs. ausentes</span></div><div><strong>{c.horasTotalesPlanificadas}</strong><span>Hs. totales</span></div></div><div className="attendance-thresholds"><span>Promoción ≥ <strong>{c.porcentajePromocion}%</strong></span><span>Regularidad ≥ <strong>{c.porcentajeRegularidad}%</strong></span><span>Libre &lt; <strong>{c.porcentajeLibre}%</strong></span></div></div>)}</div>}</>}
+  </div>
+}

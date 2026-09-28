@@ -1,0 +1,13 @@
+import { useEffect, useState } from "react";
+import { getCuotas, guardarCuota } from "../services/cuotaService";
+import type { EstadoCuota } from "../types/Calificaciones";
+
+export default function CuotasPage(){
+ const [rows,setRows]=useState<EstadoCuota[]>([]),[q,setQ]=useState(""),[error,setError]=useState("");
+ async function load(){try{setRows(await getCuotas())}catch(e){setError(e instanceof Error?e.message:"Error")}}
+ useEffect(()=>{load()},[]);
+ function edit(id:string,k:keyof EstadoCuota,v:unknown){setRows(r=>r.map(x=>x.alumnoId===id?{...x,[k]:v}:x))}
+ async function save(x:EstadoCuota){try{setError("");const y=await guardarCuota(x.alumnoId,{alDia:x.alDia,ultimoPeriodoPagado:x.ultimoPeriodoPagado||null,fechaUltimoPago:x.fechaUltimoPago?x.fechaUltimoPago.substring(0,10):null,importeUltimoPago:x.importeUltimoPago??null,observacion:x.observacion||null});setRows(r=>r.map(z=>z.alumnoId===x.alumnoId?y:z))}catch(e){setError(e instanceof Error?e.message:"Error")}}
+ const f=rows.filter(x=>(x.alumnoNombre+" "+x.alumnoDni).toLowerCase().includes(q.toLowerCase()));
+ return <div><div className="page-header"><h1>Cuotas</h1><p>Secretaría controla el estado de cuenta. Sólo los alumnos al día pueden recibir calificaciones.</p></div>{error&&<div className="alert-error">{error}</div>}<div className="card"><div className="form-group"><label>Buscar alumno</label><input value={q} onChange={e=>setQ(e.target.value)} placeholder="Nombre o DNI"/></div></div><div className="card table-container"><table><thead><tr><th>Alumno</th><th>Estado</th><th>Último período</th><th>Fecha pago</th><th>Importe</th><th>Observación</th><th></th></tr></thead><tbody>{f.map(x=><tr key={x.alumnoId}><td>{x.alumnoNombre}<small className="table-sub">{x.alumnoDni}</small></td><td><select value={x.alDia?"1":"0"} onChange={e=>edit(x.alumnoId,"alDia",e.target.value==="1")}><option value="1">Al día</option><option value="0">Con deuda</option></select></td><td><input value={x.ultimoPeriodoPagado??""} onChange={e=>edit(x.alumnoId,"ultimoPeriodoPagado",e.target.value)} placeholder="Ej: 09/2026"/></td><td><input type="date" value={x.fechaUltimoPago?.substring(0,10)??""} onChange={e=>edit(x.alumnoId,"fechaUltimoPago",e.target.value)}/></td><td><input type="number" min="0" step="0.01" value={x.importeUltimoPago??""} onChange={e=>edit(x.alumnoId,"importeUltimoPago",e.target.value===""?null:Number(e.target.value))}/></td><td><input value={x.observacion??""} onChange={e=>edit(x.alumnoId,"observacion",e.target.value)}/></td><td><button className="btn btn-primary btn-small" onClick={()=>save(x)}>Guardar</button></td></tr>)}</tbody></table></div></div>
+}
