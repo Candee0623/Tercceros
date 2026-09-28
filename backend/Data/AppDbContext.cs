@@ -29,6 +29,10 @@ public class AppDbContext : DbContext
     public DbSet<Mensaje> Mensajes { get; set; }
     public DbSet<MensajeDestinatario> MensajesDestinatarios { get; set; }
 
+    // Avisos / Cartelera y Trámites
+    public DbSet<Anuncio> Anuncios { get; set; }
+    public DbSet<SolicitudTramite> SolicitudesTramite { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -259,6 +263,30 @@ public class AppDbContext : DbContext
 
         // Alumno -> Destinatarios
         modelBuilder.Entity<MensajeDestinatario>()
+            .HasOne(x => x.Alumno)
+            .WithMany()
+            .HasForeignKey(x => x.AlumnoId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // =========================
+        // ANUNCIOS
+        // =========================
+        modelBuilder.Entity<Anuncio>()
+            .HasOne(x => x.Usuario)
+            .WithMany()
+            .HasForeignKey(x => x.UsuarioId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // =========================
+        // TRAMITES
+        // =========================
+        modelBuilder.Entity<SolicitudTramite>()
+            .HasOne(x => x.Usuario)
+            .WithMany()
+            .HasForeignKey(x => x.UsuarioId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<SolicitudTramite>()
             .HasOne(x => x.Alumno)
             .WithMany()
             .HasForeignKey(x => x.AlumnoId)

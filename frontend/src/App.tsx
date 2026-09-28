@@ -26,6 +26,8 @@ import CuotasPage from "./pages/CuotasPage";
 import PlanEstudiosPage from "./pages/PlanEstudiosPage";
 import CalendarioPage from "./pages/CalendarioPage";
 import MensajesPage from "./pages/MensajesPage";
+import AnunciosPage from "./pages/AnunciosPage";
+import TramitesPage from "./pages/TramitesPage";
 
 import {
   clearSession,
@@ -128,6 +130,20 @@ function App() {
         icon: "💬",
         permiso: "mensajes",
         element: <MensajesPage />,
+      },
+      {
+        path: "/anuncios",
+        label: "Avisos / Cartelera",
+        icon: "📢",
+        permiso: "anuncios",
+        element: <AnunciosPage />,
+      },
+      {
+        path: "/tramites",
+        label: "Trámites y Certificados",
+        icon: "📑",
+        permiso: "tramites",
+        element: <TramitesPage />,
       },
       {
         path: "/calendario",

@@ -27,6 +27,8 @@ builder.Services.AddScoped<CalificacionService>();
 builder.Services.AddScoped<CuotaService>();
 builder.Services.AddScoped<PlanEstudioService>();
 builder.Services.AddScoped<MensajeService>();
+builder.Services.AddScoped<AnuncioService>();
+builder.Services.AddScoped<TramiteService>();
 
 var jwtKey = builder.Configuration["Jwt:Key"]
     ?? throw new InvalidOperationException("Debe configurarse Jwt:Key.");

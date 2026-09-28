@@ -25,6 +25,10 @@ public static class ScreenKeys
     public const string Calificaciones = "calificaciones";
     public const string Cuotas = "cuotas";
 
+    // Nuevas funcionalidades: Avisos / Cartelera y Trámites
+    public const string Anuncios = "anuncios";
+    public const string Tramites = "tramites";
+
     public static readonly IReadOnlyDictionary<string, string> Todas =
         new Dictionary<string, string>
         {
@@ -42,6 +46,8 @@ public static class ScreenKeys
             [Calendario] = "Calendario",
 
             [Mensajes] = "Mensajes",
+            [Anuncios] = "Avisos y Cartelera",
+            [Tramites] = "Trámites y Certificados",
 
             [MisDatos] = "Mis datos (alumno)",
             [MiAsistencia] = "Mi asistencia (alumno)",
@@ -55,6 +61,8 @@ public static class ScreenKeys
         MisDatos,
         MiAsistencia,
         AutoMatriculacion,
-        Mensajes
+        Mensajes,
+        Anuncios,
+        Tramites
     };
 }
